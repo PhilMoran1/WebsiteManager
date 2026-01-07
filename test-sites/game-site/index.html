@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Click Frenzy - Free Online Game</title>
+  
+  <!-- Website Manager Tracking - Replace TRACKING_ID after adding site to dashboard -->
+  <script src="http://localhost:3001/tracker.js?siteId=TRACKING_ID" async></script>
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100vh;
+      color: #fff;
+    }
+    
+    .header {
+      background: rgba(0,0,0,0.3);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      background: linear-gradient(90deg, #f72585, #7209b7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .ad-banner {
+      background: linear-gradient(90deg, #2d2d44, #3d3d5c);
+      border: 2px dashed #555;
+      padding: 1rem;
+      text-align: center;
+      color: #888;
+      font-size: 0.9rem;
+      margin: 1rem auto;
+      max-width: 728px;
+      border-radius: 8px;
+    }
+    
+    .ad-banner::before {
+      content: "📢 ";
+    }
+    
+    .game-container {
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      text-align: center;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .subtitle {
+      color: #888;
+      margin-bottom: 2rem;
+    }
+    
+    .game-area {
+      background: rgba(255,255,255,0.05);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .score-display {
+      font-size: 3rem;
+      font-weight: bold;
+      color: #4cc9f0;
+      margin-bottom: 1rem;
+    }
+    
+    .click-button {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, #f72585, #7209b7);
+      color: white;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.1s;
+      box-shadow: 0 10px 30px rgba(247, 37, 133, 0.3);
+    }
+    
+    .click-button:hover {
+      transform: scale(1.05);
+    }
+    
+    .click-button:active {
+      transform: scale(0.95);
+    }
+    
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 1.5rem;
+    }
+    
+    .stat {
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #4cc9f0;
+    }
+    
+    .stat-label {
+      font-size: 0.8rem;
+      color: #888;
+    }
+    
+    .sidebar-ad {
+      position: fixed;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 160px;
+      height: 600px;
+      background: linear-gradient(180deg, #2d2d44, #3d3d5c);
+      border: 2px dashed #555;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #888;
+      font-size: 0.8rem;
+      text-align: center;
+      padding: 1rem;
+    }
+    
+    @media (max-width: 1200px) {
+      .sidebar-ad { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="logo">🎮 Click Frenzy</div>
+    <nav>
+      <a href="#" style="color: #888; text-decoration: none; margin-left: 1rem;">Leaderboard</a>
+      <a href="#" style="color: #888; text-decoration: none; margin-left: 1rem;">About</a>
+    </nav>
+  </header>
+  
+  <!-- Top Banner Ad -->
+  <div class="ad-banner">
+    Advertisement Space - 728x90 Leaderboard
+    <br><small>Replace with your AdSense code</small>
+  </div>
+  
+  <main class="game-container">
+    <h1>Click Frenzy</h1>
+    <p class="subtitle">How fast can you click? Test your speed!</p>
+    
+    <div class="game-area">
+      <div class="score-display" id="score">0</div>
+      <button class="click-button" id="clickBtn" onclick="handleClick()">
+        CLICK ME!
+      </button>
+      
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-value" id="cps">0.0</div>
+          <div class="stat-label">Clicks/sec</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="best">0</div>
+          <div class="stat-label">Best Score</div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Sidebar Ad -->
+  <div class="sidebar-ad">
+    📢 Ad Space<br>160x600<br>Skyscraper
+  </div>
+  
+  <!-- Bottom Banner Ad -->
+  <div class="ad-banner">
+    Advertisement Space - 728x90 Leaderboard
+    <br><small>Replace with your AdSense code</small>
+  </div>
+
+  <script>
+    let score = 0;
+    let startTime = null;
+    let best = localStorage.getItem('clickFrenzyBest') || 0;
+    
+    document.getElementById('best').textContent = best;
+    
+    function handleClick() {
+      score++;
+      document.getElementById('score').textContent = score;
+      
+      if (!startTime) startTime = Date.now();
+      
+      const elapsed = (Date.now() - startTime) / 1000;
+      const cps = elapsed > 0 ? (score / elapsed).toFixed(1) : 0;
+      document.getElementById('cps').textContent = cps;
+      
+      // Track milestone events
+      if (score % 100 === 0 && window.wm) {
+        wm('game_milestone', { score: score, cps: parseFloat(cps) });
+      }
+      
+      if (score > best) {
+        best = score;
+        localStorage.setItem('clickFrenzyBest', best);
+        document.getElementById('best').textContent = best;
+      }
+    }
+    
+    // Track game start
+    document.getElementById('clickBtn').addEventListener('click', function() {
+      if (score === 1 && window.wm) {
+        wm('game_start', { game: 'click_frenzy' });
+      }
+    }, { once: true });
+  </script>
+</body>
+</html>

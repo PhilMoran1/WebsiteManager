@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Awesome Site</title>
+  
+  <!-- 🔴 REPLACE 'YOUR_TRACKING_ID' WITH YOUR ACTUAL TRACKING ID FROM THE DASHBOARD -->
+  <script src="http://localhost:3001/tracker.js?siteId=wm_f4b4c40222ca" async></script>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 100%);
+      min-height: 100vh;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    
+    .container {
+      max-width: 600px;
+      text-align: center;
+    }
+    
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(90deg, #00d4ff, #7b2fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    p {
+      color: #a0a0b0;
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+    
+    .buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    button {
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(90deg, #00d4ff, #7b2fff);
+      color: white;
+      font-weight: bold;
+    }
+    
+    .btn-secondary {
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+    }
+    
+    .counter {
+      margin-top: 3rem;
+      padding: 2rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .count {
+      font-size: 4rem;
+      font-weight: bold;
+      color: #00d4ff;
+    }
+    
+    .ad-placeholder {
+      margin-top: 3rem;
+      padding: 1rem;
+      background: rgba(255,255,255,0.05);
+      border: 2px dashed rgba(255,255,255,0.2);
+      border-radius: 10px;
+      color: #666;
+      font-size: 0.9rem;
+    }
+    
+    footer {
+      margin-top: 3rem;
+      color: #555;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚀 My Awesome Site</h1>
+    <p>Welcome! This is a simple test website connected to the Website Manager dashboard.</p>
+    
+    <div class="buttons">
+      <button class="btn-primary" onclick="trackClick('signup')">Sign Up</button>
+      <button class="btn-secondary" onclick="trackClick('learn_more')">Learn More</button>
+    </div>
+    
+    <div class="counter">
+      <div>Click the button!</div>
+      <div class="count" id="count">0</div>
+      <button class="btn-primary" style="margin-top: 1rem;" onclick="incrementCounter()">
+        Click Me! 👆
+      </button>
+    </div>
+    
+    <div class="ad-placeholder">
+      📢 Ad Space - Replace with AdSense code
+    </div>
+    
+    <footer>
+      Powered by Website Manager
+    </footer>
+  </div>
+
+  <script>
+    let count = 0;
+    
+    function incrementCounter() {
+      count++;
+      document.getElementById('count').textContent = count;
+      
+      // Track every 10 clicks
+      if (count % 10 === 0 && window.wm) {
+        wm('milestone', { clicks: count });
+      }
+    }
+    
+    function trackClick(button) {
+      if (window.wm) {
+        wm('button_click', { button: button });
+      }
+      alert('You clicked: ' + button + '\n\nThis click was tracked!');
+    }
+  </script>
+</body>
+</html>
