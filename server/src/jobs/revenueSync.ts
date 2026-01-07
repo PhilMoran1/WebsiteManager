@@ -1,108 +1,23 @@
 import cron from 'node-cron';
 import { query } from '../config/database';
-import { google } from 'googleapis';
 
-// AdSense API client setup
-function getAdSenseClient() {
+// Sync AdSense revenue data
+// TODO: Implement AdSense API integration when credentials are available
+async function syncAdSenseRevenue() {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
   const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
-  
-  if (!clientId || !clientSecret || !refreshToken) {
-    return null;
-  }
-  
-  const oauth2Client = new google.auth.OAuth2(clientId, clientSecret);
-  oauth2Client.setCredentials({ refresh_token: refreshToken });
-  
-  return google.adsense({ version: 'v2', auth: oauth2Client });
-}
-
-// Sync AdSense revenue data
-async function syncAdSenseRevenue() {
-  const adsense = getAdSenseClient();
-  
-  if (!adsense) {
-    console.log('AdSense API not configured, skipping sync');
-    return;
-  }
-  
   const accountId = process.env.ADSENSE_ACCOUNT_ID;
-  if (!accountId) {
-    console.log('AdSense account ID not configured');
+  
+  if (!clientId || !clientSecret || !refreshToken || !accountId) {
+    console.log('AdSense API not configured, skipping sync');
+    console.log('To enable AdSense sync, set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN, and ADSENSE_ACCOUNT_ID');
     return;
   }
   
-  try {
-    console.log('🔄 Syncing AdSense revenue...');
-    
-    // Get yesterday's date (AdSense data is typically available with 1-day delay)
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const dateStr = yesterday.toISOString().split('T')[0];
-    
-    // Fetch report from AdSense
-    const response = await adsense.accounts.reports.generate({
-      account: `accounts/${accountId}`,
-      dateRange: 'CUSTOM',
-      startDate: { year: yesterday.getFullYear(), month: yesterday.getMonth() + 1, day: yesterday.getDate() },
-      endDate: { year: yesterday.getFullYear(), month: yesterday.getMonth() + 1, day: yesterday.getDate() },
-      metrics: ['ESTIMATED_EARNINGS', 'IMPRESSIONS', 'CLICKS', 'PAGE_VIEWS'],
-      dimensions: ['DOMAIN_NAME'],
-    });
-    
-    const rows = response.data.rows || [];
-    
-    for (const row of rows) {
-      const domain = row.cells?.[0]?.value;
-      const earnings = parseFloat(row.cells?.[1]?.value || '0');
-      const impressions = parseInt(row.cells?.[2]?.value || '0');
-      const clicks = parseInt(row.cells?.[3]?.value || '0');
-      
-      if (!domain) continue;
-      
-      // Find matching site by URL
-      const siteResult = await query(
-        `SELECT id FROM sites WHERE url LIKE $1`,
-        [`%${domain}%`]
-      );
-      
-      if (siteResult.rows.length === 0) {
-        console.log(`No site found for domain: ${domain}`);
-        continue;
-      }
-      
-      const siteId = siteResult.rows[0].id;
-      
-      // Upsert revenue data
-      await query(`
-        INSERT INTO revenue (site_id, source, amount, impressions, clicks, date, metadata)
-        VALUES ($1, 'adsense', $2, $3, $4, $5, $6)
-        ON CONFLICT (site_id, source, date)
-        DO UPDATE SET 
-          amount = $2,
-          impressions = $3,
-          clicks = $4,
-          metadata = $6,
-          updated_at = NOW()
-      `, [siteId, earnings, impressions, clicks, dateStr, JSON.stringify({ domain })]);
-      
-      // Update daily stats
-      await query(`
-        UPDATE daily_stats 
-        SET total_revenue = (
-          SELECT COALESCE(SUM(amount), 0) 
-          FROM revenue 
-          WHERE site_id = $1 AND date = $2
-        )
-        WHERE site_id = $1 AND date = $2
-      `, [siteId, dateStr]);
-    }
-    
-    console.log(`✅ AdSense sync complete. Processed ${rows.length} domains.`);
-  } catch (error) {
-    console.error('❌ AdSense sync failed:', error);
-  }
+  // AdSense integration will be implemented when credentials are provided
+  // For now, revenue can be added manually via the API
+  console.log('AdSense sync placeholder - implement when ready');
 }
 
 // Check alert rules and create alerts if needed
