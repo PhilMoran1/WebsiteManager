@@ -1,16 +1,27 @@
 import { Pool } from 'pg';
-import dotenv from 'dotenv';
 
-dotenv.config();
+// Don't use dotenv in production - Railway sets env vars directly
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
 
+const databaseUrl = process.env.DATABASE_URL;
 const isProduction = process.env.NODE_ENV === 'production';
 
-console.log('🔌 Connecting to database...');
-console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
+console.log('=== DATABASE CONFIG ===');
 console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('DATABASE_URL exists:', !!databaseUrl);
+console.log('DATABASE_URL starts with:', databaseUrl?.substring(0, 30) + '...');
+console.log('========================');
+
+if (!databaseUrl && isProduction) {
+  console.error('❌ FATAL: DATABASE_URL is not set in production!');
+  console.error('Available env vars:', Object.keys(process.env).filter(k => !k.includes('SECRET') && !k.includes('PASSWORD')).join(', '));
+  process.exit(1);
+}
 
 export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/website_manager',
+  connectionString: databaseUrl || 'postgresql://postgres:postgres@localhost:5432/website_manager',
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,
